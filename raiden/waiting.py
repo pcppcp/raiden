@@ -69,6 +69,7 @@ def wait_for_participant_newbalance(
 
     while balance(channel_state) < target_balance:
         gevent.sleep(poll_timeout)
+        log.info('wait newbalance', balance=balance(channel_state), target_balance=target_balance)
         channel_state = views.get_channelstate_for(
             views.state_from_raiden(raiden),
             payment_network_id,
@@ -169,9 +170,12 @@ def wait_for_healthy(raiden, node_address, poll_timeout):
     network_statuses = views.get_networkstatuses(
         views.state_from_raiden(raiden),
     )
+    from raiden.utils import pex
 
+    log.info('waiting for reachable node', node=pex(node_address))
     while network_statuses.get(node_address) != NODE_NETWORK_REACHABLE:
         gevent.sleep(poll_timeout)
         network_statuses = views.get_networkstatuses(
             views.state_from_raiden(raiden),
         )
+    log.info('noda is reachable', node=pex(node_address))

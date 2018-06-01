@@ -284,7 +284,7 @@ class BlockchainEvents:
     def __init__(self):
         self.event_listeners = list()
 
-    def poll_all_event_listeners(self, from_block=None):
+    def poll_all_event_listeners(self, from_block=0):
         result = list()
         reinstalled_filters = False
 
@@ -323,7 +323,7 @@ class BlockchainEvents:
 
         return result
 
-    def poll_blockchain_events(self, from_block=None):
+    def poll_blockchain_events(self, from_block=0):
         for event in self.poll_all_event_listeners(from_block):
             yield decode_event_to_internal(event)
 
@@ -344,7 +344,7 @@ class BlockchainEvents:
 
         return poll_event_listener(eth_filter, abi)
 
-    def add_registry_listener(self, registry_proxy, from_block=None):
+    def add_registry_listener(self, registry_proxy, from_block=0):
         tokenadded = registry_proxy.tokenadded_filter(from_block)
         registry_address = registry_proxy.address
 
@@ -355,7 +355,7 @@ class BlockchainEvents:
             registry_proxy.tokenadded_filter,
         )
 
-    def add_channel_manager_listener(self, channel_manager_proxy, from_block=None):
+    def add_channel_manager_listener(self, channel_manager_proxy, from_block=0):
         channelnew = channel_manager_proxy.channelnew_filter(from_block)
         manager_address = channel_manager_proxy.address
 
@@ -366,7 +366,13 @@ class BlockchainEvents:
             channel_manager_proxy.channelnew_filter,
         )
 
-    def add_netting_channel_listener(self, netting_channel_proxy, from_block=None):
+    def add_netting_channel_listener(self, netting_channel_proxy, from_block=0):
+        log.info(
+            'add_netting_channel_listener',
+            from_block=from_block,
+            proxy=netting_channel_proxy,
+            xself=self
+        )
         netting_channel_events = netting_channel_proxy.all_events_filter(from_block)
         channel_address = netting_channel_proxy.address
 
@@ -377,7 +383,7 @@ class BlockchainEvents:
             netting_channel_proxy.all_events_filter,
         )
 
-    def add_proxies_listeners(self, proxies, from_block=None):
+    def add_proxies_listeners(self, proxies, from_block=0):
         self.add_registry_listener(proxies.registry, from_block)
 
         for manager in proxies.channel_managers:

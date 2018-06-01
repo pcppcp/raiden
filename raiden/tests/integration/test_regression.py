@@ -23,6 +23,9 @@ from raiden.utils import sha3
 
 # pylint: disable=too-many-locals
 
+import structlog
+log = structlog.get_logger()
+
 
 @pytest.mark.parametrize('number_of_nodes', [5])
 @pytest.mark.parametrize('channels_per_node', [0])
@@ -65,14 +68,19 @@ def test_regression_unfiltered_routes(
             deposit,
             settle_timeout,
         ))
-    gevent.wait(greenlets)
+    ready = gevent.wait(greenlets, timeout=30)
+    assert len(ready) == len(greenlets)
+    log.info('channels created')
 
-    wait_for_channels(
-        app_channels,
-        registry_address,
-        [token],
-        deposit,
-    )
+    exception = RuntimeError('nodes are unreachable')
+    with gevent.Timeout(seconds=120, exception=exception):
+        wait_for_channels(
+            app_channels,
+            registry_address,
+            [token],
+            deposit,
+        )
+    log.info('channels ready')
 
     transfer = app0.raiden.mediated_transfer_async(
         registry_address=app0.raiden.default_registry.address,
@@ -81,6 +89,7 @@ def test_regression_unfiltered_routes(
         target=app4.raiden.address,
         identifier=1,
     )
+    log.info('transfer sent')
     assert transfer.wait()
 
 

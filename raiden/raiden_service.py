@@ -391,7 +391,7 @@ class RaidenService:
 
         message.sign(self.private_key, self.address)
 
-    def register_payment_network(self, registry_address, from_block=None):
+    def register_payment_network(self, registry_address, from_block=0):
         proxies = get_relevant_proxies(
             self.chain,
             self.address,

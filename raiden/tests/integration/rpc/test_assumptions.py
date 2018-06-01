@@ -3,7 +3,7 @@ from binascii import unhexlify
 import os
 
 import pytest
-from eth_utils import decode_hex, to_checksum_address
+from eth_utils import to_checksum_address
 
 from raiden.network.rpc.filters import new_filter, get_filter_events
 from raiden.network.rpc.transactions import check_transaction_threw
@@ -41,54 +41,6 @@ def get_list_of_block_numbers(item):
     return list()
 
 
-def test_call_inexisting_address(deploy_client, blockchain_backend):
-    """ A JSON RPC call to an inexisting address returns the empty string. """
-
-    inexisting_address = b'\x01\x02\x03\x04\x05' * 4
-
-    assert len(deploy_client.web3.eth.getCode(to_checksum_address(inexisting_address))) == 0
-    assert deploy_client.eth_call(sender=deploy_client.sender, to=inexisting_address) == b''
-
-
-def test_call_invalid_selector(deploy_client, blockchain_backend):
-    """ A JSON RPC call to a valid address but with an invalid selector returns
-    the empty string.
-    """
-    contract_proxy = deploy_rpc_test_contract(deploy_client)
-    address = contract_proxy.contract_address
-    assert len(deploy_client.web3.eth.getCode(to_checksum_address(address))) > 0
-
-    selector = decode_hex(contract_proxy.encode_function_call('ret', args=[]))
-    next_byte = chr(selector[0] + 1).encode()
-    wrong_selector = next_byte + selector[1:]
-    result = deploy_client.eth_call(
-        sender=deploy_client.sender,
-        to=address,
-        data=wrong_selector,
-    )
-    assert result == b''
-
-
-def test_call_throws(deploy_client, blockchain_backend):
-    """ A JSON RPC call to a function that throws returns the empty string. """
-    contract_proxy = deploy_rpc_test_contract(deploy_client)
-
-    address = contract_proxy.contract_address
-    assert len(deploy_client.web3.eth.getCode(to_checksum_address(address))) > 0
-
-    assert contract_proxy.call('fail') == b''
-
-
-def test_estimate_gas_fail(deploy_client, blockchain_backend):
-    """ A JSON RPC estimate gas call for a throwing transaction returns None"""
-    contract_proxy = deploy_rpc_test_contract(deploy_client)
-
-    address = contract_proxy.contract_address
-    assert len(deploy_client.web3.eth.getCode(to_checksum_address(address))) > 0
-
-    assert not contract_proxy.estimate_gas('fail')
-
-
 def test_duplicated_transaction_raises(deploy_client, blockchain_backend):
     """ If the same transaction is sent twice a JSON RPC error is raised. """
     contract_proxy = deploy_rpc_test_contract(deploy_client)
@@ -104,8 +56,8 @@ def test_duplicated_transaction_raises(deploy_client, blockchain_backend):
     )
 
     second_proxy = second_client.new_contract_proxy(
-        contract_proxy.abi,
-        contract_proxy.contract_address,
+        contract_proxy.contract.abi,
+        contract_proxy.contract.address,
     )
 
     gas = contract_proxy.estimate_gas('ret') * 2

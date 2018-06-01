@@ -48,6 +48,7 @@ def wait_for_usable_channel(
     The channel and the deposits are registered, and the partner network state
     is reachable.
     """
+    log.info('wait_for_newchannel', app0=app0, app1=app1)
     waiting.wait_for_newchannel(
         app0.raiden,
         registry_address,
@@ -56,6 +57,7 @@ def wait_for_usable_channel(
         events_poll_timeout,
     )
 
+    log.info('wait_for_newbalance1', app0=app0, app1=app1)
     waiting.wait_for_participant_newbalance(
         app0.raiden,
         registry_address,
@@ -66,6 +68,7 @@ def wait_for_usable_channel(
         events_poll_timeout,
     )
 
+    log.info('wait_for_newbalance2', app0=app0, app1=app1)
     waiting.wait_for_participant_newbalance(
         app0.raiden,
         registry_address,
@@ -76,11 +79,13 @@ def wait_for_usable_channel(
         events_poll_timeout,
     )
 
+    log.info('wait_for_healthy', app0=app0, app1=app1)
     waiting.wait_for_healthy(
         app0.raiden,
         app1.raiden.address,
         events_poll_timeout,
     )
+    log.info('wait finished', app0=app0, app1=app1)
 
 
 def wait_for_channels(

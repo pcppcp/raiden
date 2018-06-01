@@ -13,6 +13,9 @@ from raiden.utils import (
     encode_hex,
 )
 from raiden.utils.typing import Address
+import structlog
+
+log = structlog.get_logger()
 
 
 def new_filter(
@@ -22,6 +25,8 @@ def new_filter(
         from_block: Union[str, int] = 0,
         to_block: Union[str, int] = 'latest'):
     """ Custom new filter implementation to handle bad encoding from geth rpc. """
+    if from_block is None:
+        from_block = 0
     json_data = {
         'fromBlock': from_block,
         'toBlock': to_block,
@@ -35,6 +40,7 @@ def new_filter(
         ]
 
     new_filter = jsonrpc_client.web3.eth.filter(json_data)
+    log.info('new_filter', params=json_data, f=new_filter)
     return new_filter.filter_id
 
 

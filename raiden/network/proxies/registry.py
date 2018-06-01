@@ -27,40 +27,41 @@ from raiden.network.proxies.channel_manager import ChannelManager
 from raiden.network.rpc.client import check_address_has_code
 from raiden.network.rpc.transactions import (
     check_transaction_threw,
-    estimate_and_transact,
 )
 from raiden.network.rpc.filters import (
     new_filter,
     Filter,
 )
+from raiden.network.rpc.smartcontract_proxy import ContractProxy
+from eth_utils import to_checksum_address
 
 log = structlog.get_logger(__name__)  # pylint: disable=invalid-name
 
 
-class Registry:
+class Registry(ContractProxy):
     def __init__(
             self,
             jsonrpc_client,
             registry_address,
             poll_timeout=DEFAULT_POLL_TIMEOUT):
         # pylint: disable=too-many-arguments
+        super().__init__(jsonrpc_client)
 
         if not isaddress(registry_address):
             raise ValueError('registry_address must be a valid address')
 
         check_address_has_code(jsonrpc_client, registry_address, 'Registry')
 
-        proxy = jsonrpc_client.new_contract_proxy(
+        self.contract = jsonrpc_client.new_contract(
             CONTRACT_MANAGER.get_contract_abi(CONTRACT_REGISTRY),
             address_encoder(registry_address),
         )
         CONTRACT_MANAGER.check_contract_version(
-            proxy.call('contract_version').decode(),
+            self.contract.functions.contract_version().call(),
             CONTRACT_REGISTRY
         )
 
         self.address = registry_address
-        self.proxy = proxy
         self.client = jsonrpc_client
         self.poll_timeout = poll_timeout
         self.node_address = privatekey_to_address(self.client.privkey)
@@ -72,10 +73,9 @@ class Registry:
         """ Return the channel manager address for the given token or None if
         there is no correspoding address.
         """
-        address = self.proxy.call(
-            'channelManagerByToken',
-            token_address,
-        )
+        address = self.contract.functions.channelManagerByToken(
+            to_checksum_address(token_address),
+        ).call()
 
         if address == b'':
             check_address_has_code(self.client, self.address)
@@ -94,8 +94,7 @@ class Registry:
             registry_address=pex(self.address),
         )
 
-        transaction_hash = estimate_and_transact(
-            self.proxy,
+        transaction_hash = self.transact(
             'addToken',
             self.address,
             token_address,
@@ -135,21 +134,23 @@ class Registry:
         return manager_address
 
     def token_addresses(self):
+        addresses = self.contract.functions.tokenAddresses().call()
         return [
             address_decoder(address)
-            for address in self.proxy.call('tokenAddresses')
+            for address in addresses
         ]
 
     def manager_addresses(self):
+        addresses = self.contract.functions.channelManagerAddresses().call()
         return [
             address_decoder(address)
-            for address in self.proxy.call('channelManagerAddresses')
+            for address in addresses
         ]
 
-    def tokenadded_filter(self, from_block=None, to_block=None):
+    def tokenadded_filter(self, from_block=0, to_block='latest'):
         topics = [CONTRACT_MANAGER.get_event_id(EVENT_TOKEN_ADDED)]
 
-        registry_address_bin = self.proxy.contract_address
+        registry_address_bin = self.contract.address
         filter_id_raw = new_filter(
             self.client,
             registry_address_bin,

@@ -14,10 +14,7 @@ env:
   - SOLC_VERSION='v0.4.23'
   matrix:
   - TEST='./raiden/tests/unit'
-  - TEST='./raiden/tests/integration --ignore=./raiden/tests/integration/transfer --ignore=./raiden/tests/integration/long_running --ignore=./raiden/tests/integration/api'
-  - TEST='./raiden/tests/integration/transfer'
-  - TEST='./raiden/tests/integration/long_running'
-  - TEST='./raiden/tests/integration/api'
+  - TEST='./raiden/tests/integration/test_regression.py::test_regression_unfiltered_routes[32-0-5]'
 cache:
   pip: true
   directories:
@@ -33,7 +30,7 @@ install:
 before_script:
   ./.travis/before_script.sh
 script:
-  - coverage run -m py.test -Wd --travis-fold=always -vvvvvv --log-config='raiden:DEBUG' --random --blockchain-type=geth $TEST
+  - coverage run -m py.test -Wd --travis-fold=always -vvvvvvs --log-config='raiden:DEBUG' --random --blockchain-type=geth $TEST
 after_script:
   - coveralls
 notifications:
