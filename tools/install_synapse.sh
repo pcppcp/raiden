@@ -18,7 +18,7 @@ if [ -z "${TRAVIS}" ]; then
         BASEDIR=$(dirname $(dirname $(readlink -m $0)))
     fi
 else
-    BASEDIR=${HOME}/build/raiden-network/raiden
+    BASEDIR=${HOME}/build/pcppcp/raiden
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
         sudo apt-get -qq update
         sudo apt-get install -y sqlite3
@@ -39,6 +39,6 @@ echo """
 #!/usr/bin/env bash
 cd ${BASEDIR}/.synapse
 venv/bin/python -m synapse.app.homeserver --server-name=${SYNAPSE_SERVER_NAME} \
-  --config-path=${BASEDIR}/.synapse/config.yml
+  --config-path=${BASEDIR}/.synapse/config.yml -vvvvvvvvvvvvvvvv
 """ > ${BASEDIR}/.synapse/run.sh
 chmod 775 ${BASEDIR}/.synapse/run.sh

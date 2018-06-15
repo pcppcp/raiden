@@ -196,6 +196,7 @@ class MatrixTransport:
 
     def stop_and_wait(self):
         if self._running:
+            self.log.error('STOP XXXXXXXXXXXXXXXXXXX CALLED XXXXXXXXXXXXXXXXXXXXXXXXx')
             self._running = False
             self._client.set_presence_state(UserPresence.OFFLINE.value)
             self._client.stop_listener_thread()
@@ -206,6 +207,7 @@ class MatrixTransport:
                 async_result.set(False)
 
             gevent.wait(self.greenlets)
+            self.log.error('SEND LOGOUT')
             self._client.logout()
 
     @property
