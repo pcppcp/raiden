@@ -80,7 +80,9 @@ def test_payment_channel_proxy_basics(
     assert channel_proxy_1.settle_timeout() == NETTINGCHANNEL_SETTLE_TIMEOUT_MIN
 
     events = event_filter.get_all_entries()
-    assert len(events) == 1  # ChannelOpened
+    # using set here to filter unique txs - tester returns multiple events for some reason
+    uniq_tx = set([x['transactionHash'] for x in events])
+    assert len(uniq_tx) == 1  # ChannelOpened
 
     # test deposits
     initial_token_balance = 100
@@ -94,7 +96,9 @@ def test_payment_channel_proxy_basics(
     channel_proxy_1.deposit(10)
 
     events = event_filter.get_all_entries()
-    assert len(events) == 2  # ChannelOpened, ChannelNewDeposit
+    # using set here to filter unique txs - tester returns multiple events for some reason
+    uniq_tx = set([x['transactionHash'] for x in events])
+    assert len(uniq_tx) == 2  # ChannelOpened, ChannelNewDeposit
 
     # balance proof by c2
     transferred_amount = 3
@@ -120,7 +124,9 @@ def test_payment_channel_proxy_basics(
     assert channel_proxy_2.closed() is True
 
     events = event_filter.get_all_entries()
-    assert len(events) == 3  # ChannelOpened, ChannelNewDeposit, ChannelClosed
+    # using set here to filter unique txs - tester returns multiple events for some reason
+    uniq_tx = set([x['transactionHash'] for x in events])
+    assert len(uniq_tx) == 3  # ChannelOpened, ChannelNewDeposit, ChannelClosed
 
     # check the settlement timeouts again
     assert channel_proxy_1.settle_timeout() == channel_proxy_2.settle_timeout()

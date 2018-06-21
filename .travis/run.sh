@@ -6,7 +6,7 @@ if [[ ${TRAVIS_EVENT_TYPE} == "cron" ]]; then
     BLOCKCHAIN_TYPE="geth"
 else
     # FIXME: chagne to "tester" once the test failures are fixed
-    BLOCKCHAIN_TYPE="geth"
+    BLOCKCHAIN_TYPE="tester"
 fi
 
 coverage run \
