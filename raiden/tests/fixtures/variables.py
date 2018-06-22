@@ -165,9 +165,9 @@ def network_wait(transport_config, blockchain_type):
     if blockchain_type == 'tester':
         network_wait += 0.3
     if 'TRAVIS' in os.environ:
-        network_wait += 0.5
+        network_wait += 1.0
     if transport_config.protocol == TransportProtocol.MATRIX:
-        network_wait += 2.7
+        network_wait += 3.5
     return network_wait
 
 
