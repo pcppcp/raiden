@@ -17,13 +17,7 @@ env:
   - COVERALLS_PARALLEL=true
   matrix:
   - TEST='./raiden/tests/unit'
-  - TEST='./raiden/tests/integration --ignore=./raiden/tests/integration/transfer --ignore=./raiden/tests/integration/long_running --ignore=./raiden/tests/integration/api --ignore=.raiden/tests/integration/contracts' TRANSPORT_OPTIONS='--transport=udp'
-  - TEST='./raiden/tests/integration --ignore=./raiden/tests/integration/transfer --ignore=./raiden/tests/integration/long_running --ignore=./raiden/tests/integration/api --ignore=.raiden/tests/integration/contracts' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
-  - TEST='./raiden/tests/integration/transfer' TRANSPORT_OPTIONS='--transport=udp'
-  - TEST='./raiden/tests/integration/transfer' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
-  - TEST='./raiden/tests/integration/long_running ./raiden/tests/integration/contracts'
-  - TEST='./raiden/tests/integration/api' TRANSPORT_OPTIONS='--transport=udp'
-  - TEST='./raiden/tests/integration/api' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
+  - TEST='./raiden/tests/integration/transfer/test_mediatedtransfer.py::test_mediated_transfer' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
 cache:
   pip: true
   directories:
@@ -49,7 +43,6 @@ notifications:
   # coveralls 'parallel build done' trigger
   - secure: "eFjTor3HH4OiMkBYJAbiri09AV86KbMoPi9khESCOTicM/AnofrAdObguxa4v/s1d2AXbpaEpvy59R2ZaocucwSnw2UoCa/VgTPZf8FOazShn001g0PN2LS6hQFxCTFDowOHZKx9P2jqoUf17rtUDDbGfin6L/aaykJ9MCXxJKY+jlf8roDGArbaXHqntkhphNYuFsmaHHqQqjuRUdCB+Ys8BAQavsePWpyJ0kjlPo4UuSasn6OpRnrz7E6K/3tziFJB0l4hTghU2wzDYF9V+eF9jIyoqoUkcgqTeyjjAO2Rf1If20gQerf09wC8xl965VLgzZ/oQCp4WpIFzorJielLwdE498N0S/gZ0GktqO3jPfS97JaH2+ZkSb2yUdTSLxTHCva9mgqpnQAK8AOEndjMUupbc0UXe440MJzX1wT6IaQ2IwibRwADWAgUqOu5XSaV+rWPvKbBl54NwO7yAVxV20PbKqJMFAYiuVKnRRqnLDhKsZpPxEf0nfrbu/VARKeVuWEg6LkaBFPA4r+EjCQFhT/hwB/DFjoYSCf5PpFcvwL1Tl2gpQcxFhDHKHAITLwYCVCiQHkG1MdQt4fTaBUEm+BcmIbZ4FVfTYbCdys7Hge6RTKxVl8Xe7jDgibHXF4wTPHR81crX9Xk3nUm6VwJzluaTUi1OKj8Nathqbk="
 stages:
-  - lint
   - test
   - deploy
 jobs:

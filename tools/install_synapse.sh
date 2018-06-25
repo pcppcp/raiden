@@ -32,6 +32,7 @@ if [[ ! -x ${SYNAPSE} ]]; then
     pushd "${BUILDDIR}"
 
     virtualenv -p "$(which python2)" venv
+    ./venv/bin/pip install --upgrade pip
     ./venv/bin/pip install "${SYNAPSE_URL}" pyinstaller
     SYNDIR="$( find venv/lib -name synapse -type d | head -1 )"
     ./venv/bin/pyinstaller -F -n synapse \
