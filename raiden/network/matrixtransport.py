@@ -37,8 +37,8 @@ from raiden.messages import (
     Delivered,
     from_dict as message_from_dict,
     Ping,
-    SignedMessage,
     Pong,
+    SignedMessage,
     Message,
 )
 from raiden.network.transport.udp import udp_utils
@@ -235,7 +235,11 @@ class MatrixTransport:
         message_id = message.message_identifier
         if message_id not in self._messageids_to_asyncresult:
             async_result = self._messageids_to_asyncresult[message_id] = AsyncResult()
-            self._send_with_retry(receiver_address, async_result, json.dumps(message.to_dict()))
+            data = json.dumps(message.to_dict())
+#            self._send_with_retry(receiver_address, async_result, data)
+            self._send_immediate(receiver_address, data)
+            self._raiden_service.handle_state_change(ReceiveDelivered(message_id))
+            async_result.set(True)
 
         return self._messageids_to_asyncresult[message_id]
 
@@ -440,11 +444,9 @@ class MatrixTransport:
                 )
                 return
 
-        if isinstance(message, Delivered):
-            self._receive_delivered(message)
-        elif isinstance(message, Ping):
+        if isinstance(message, (Delivered, Ping, Pong)):
             self.log.warning(
-                'Not required Ping received',
+                'Not-required message received',
                 message=data,
             )
         elif isinstance(message, SignedMessage):
@@ -453,33 +455,6 @@ class MatrixTransport:
             self.log.error(
                 'Invalid message',
                 message=data,
-            )
-
-    def _receive_delivered(self, delivered: Delivered):
-        # FIXME: The signature doesn't seem to be verified - check in UDPTransport as well
-        self._raiden_service.handle_state_change(
-            ReceiveDelivered(delivered.delivered_message_identifier),
-        )
-
-        async_result = self._messageids_to_asyncresult.pop(
-            delivered.delivered_message_identifier,
-            None,
-        )
-
-        if async_result is not None:
-            async_result.set(True)
-            self.log.debug(
-                'DELIVERED MESSAGE RECEIVED',
-                node=pex(self._raiden_service.address),
-                receiver=pex(delivered.sender),
-                message_identifier=delivered.delivered_message_identifier,
-            )
-
-        else:
-            self.log.debug(
-                'DELIVERED MESSAGE UNKNOWN',
-                node=pex(self._raiden_service.address),
-                message_identifier=delivered.delivered_message_identifier,
             )
 
     def _receive_message(self, message):
@@ -491,15 +466,12 @@ class MatrixTransport:
         )
 
         try:
-            if on_udp_message(self._raiden_service, message):
-                # TODO: Maybe replace with Matrix read receipts.
-                #       Unfortunately those work on an 'up to' basis, not on individual messages
-                #       which means that message order is important which isn't guaranteed between
-                #       federated servers.
-                #       See: https://matrix.org/docs/spec/client_server/r0.3.0.html#id57
-                delivered_message = Delivered(message.message_identifier)
-                self._raiden_service.sign(delivered_message)
-                self._send_immediate(message.sender, json.dumps(delivered_message.to_dict()))
+            on_udp_message(self._raiden_service, message)
+            # TODO: Maybe replace with Matrix read receipts.
+            #       Unfortunately those work on an 'up to' basis, not on individual messages
+            #       which means that message order is important which isn't guaranteed between
+            #       federated servers.
+            #       See: https://matrix.org/docs/spec/client_server/r0.3.0.html#id57
 
         except (InvalidAddress, UnknownAddress, UnknownTokenAddress):
             self.log.warn('Exception while processing message', exc_info=True)
@@ -875,7 +847,4 @@ def _event_to_message(event, node_address):
     message_class = eventtypes_to_messagetype.get(type(event))
     if message_class is None:
         raise TypeError(f'Event type {type(event)} is not supported.')
-
-    if message_class is messages.Processed:
-        return message_class.from_event(event, node_address)
     return message_class.from_event(event)
