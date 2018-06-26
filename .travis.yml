@@ -17,7 +17,7 @@ env:
   - COVERALLS_PARALLEL=true
   matrix:
   - TEST='./raiden/tests/unit'
-  - TEST='./raiden/tests/integration/transfer/test_mediatedtransfer.py::test_mediated_transfer' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
+  - TEST='./raiden/tests/integration/transfer/test_mediatedtransfer.py::test_mediated_transfer --count=20 -x' TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh' RUN_SYNAPSE=1
 cache:
   pip: true
   directories:

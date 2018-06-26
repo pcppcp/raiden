@@ -1,7 +1,7 @@
 no_tls: true
 tls_fingerprints: []
 server_name: "matrix.local.raiden"
-web_client: true
+web_client: false
 
 soft_file_limit: 0
 
@@ -14,7 +14,7 @@ listeners:
     x_forwarded: false
 
     resources:
-      - names: [client, webclient]  # changed
+      - names: [client]  # changed
         compress: true
       - names: [federation]
         compress: false
