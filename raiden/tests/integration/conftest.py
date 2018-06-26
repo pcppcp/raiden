@@ -43,3 +43,11 @@ def pytest_generate_tests(metafunc):
 
 # since we are running everything in a single thread, patch urrlib to allow more connections
 patch_http_connection_pool(maxsize=256)
+
+
+@pytest.fixture(autouse=True)
+def clean_requests_session():
+    import requests
+    s = requests.session()
+    pool_manager = s.adapters['http://'].poolmanager
+    pool_manager.clear()
