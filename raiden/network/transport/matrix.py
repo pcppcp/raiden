@@ -235,8 +235,9 @@ class MatrixTransport:
         # Ignore duplicated messages
         message_id = message.message_identifier
         if message_id not in self._messageids_to_asyncresult:
-            async_result = self._messageids_to_asyncresult[message_id] = AsyncResult()
-            self._send_with_retry(receiver_address, async_result, json.dumps(message.to_dict()))
+            self._messageids_to_asyncresult[message_id] = AsyncResult()
+#            self._send_with_retry(receiver_address, async_result, json.dumps(message.to_dict()))
+            self._send_immediate(receiver_address, json.dumps(message.to_dict()))
 
         return self._messageids_to_asyncresult[message_id]
 
@@ -505,12 +506,6 @@ class MatrixTransport:
         except (InvalidAddress, UnknownAddress, UnknownTokenAddress):
             self.log.warn('Exception while processing message', exc_info=True)
             return
-        self.log.debug(
-            'DELIVERED',
-            node=pex(self._raiden_service.address),
-            to=pex(message.sender),
-            message_identifier=message.message_identifier,
-        )
 
     def _send_queued_messages(
         self,
