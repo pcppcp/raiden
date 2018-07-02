@@ -80,6 +80,13 @@ jobs:
       env:
         - TEST='raiden/tests/unit'
 
+    - stage: test
+      <<: *job-template-integration
+      env:
+        - TEST='raiden/tests/integration/test_echo_node.py'
+        - TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh'
+        - RUN_SYNAPSE=1
+
     - stage: integration
       <<: *job-template-integration
       env:
