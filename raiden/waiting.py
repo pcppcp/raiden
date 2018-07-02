@@ -8,7 +8,7 @@ from raiden.transfer.state import (
 )
 from raiden.transfer import channel, views
 from raiden.transfer.events import EventTransferReceivedSuccess
-from raiden.utils import typing
+from raiden.utils import typing, pex
 # type alias to avoid both circular dependencies and flake8 errors
 RaidenService = 'RaidenService'
 
@@ -87,6 +87,14 @@ def wait_for_participant_newbalance(
         partner_address,
     )
 
+    log.debug(
+        'waiting for participant newbalance',
+        payment_network_id=pex(payment_network_id),
+        token_address=pex(token_address),
+        partner_address=pex(partner_address),
+        target_address=pex(target_address),
+        target_balance=target_balance,
+    )
     while balance(channel_state) < target_balance:
         gevent.sleep(retry_timeout)
         channel_state = views.get_channelstate_for(
@@ -95,6 +103,7 @@ def wait_for_participant_newbalance(
             token_address,
             partner_address,
         )
+        log.debug('channel_state', channel_state=channel_state, balance=balance(channel_state))
 
 
 def wait_for_close(
