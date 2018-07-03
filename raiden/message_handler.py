@@ -1,7 +1,7 @@
 import structlog
 
 from raiden.raiden_service import RaidenService
-from raiden.utils import random_secret
+from raiden.utils import random_secret, pex
 from raiden.routing import get_best_routes
 from raiden.transfer import views
 from raiden.transfer.state import balanceproof_from_envelope
@@ -125,22 +125,26 @@ def handle_message_processed(raiden: RaidenService, message: Processed):
 def on_message(raiden: RaidenService, message: Message):
     """ Return True if the message is known. """
     # pylint: disable=unidiomatic-typecheck
-    if type(message) == SecretRequest:
-        handle_message_secretrequest(raiden, message)
-    elif type(message) == RevealSecret:
-        handle_message_revealsecret(raiden, message)
-    elif type(message) == Secret:
-        handle_message_secret(raiden, message)
-    elif type(message) == DirectTransfer:
-        handle_message_directtransfer(raiden, message)
-    elif type(message) == RefundTransfer:
-        handle_message_refundtransfer(raiden, message)
-    elif type(message) == LockedTransfer:
-        handle_message_lockedtransfer(raiden, message)
-    elif type(message) == Processed:
-        handle_message_processed(raiden, message)
-    else:
-        log.error('Unknown message cmdid {}'.format(message.cmdid))
+    try:
+        if type(message) == SecretRequest:
+            handle_message_secretrequest(raiden, message)
+        elif type(message) == RevealSecret:
+            handle_message_revealsecret(raiden, message)
+        elif type(message) == Secret:
+            handle_message_secret(raiden, message)
+        elif type(message) == DirectTransfer:
+            handle_message_directtransfer(raiden, message)
+        elif type(message) == RefundTransfer:
+            handle_message_refundtransfer(raiden, message)
+        elif type(message) == LockedTransfer:
+            handle_message_lockedtransfer(raiden, message)
+        elif type(message) == Processed:
+            handle_message_processed(raiden, message)
+        else:
+            log.error('Unknown message cmdid {}'.format(message.cmdid))
+            return False
+    except Exception as e:
+        log.exception('Error while handling message', node=pex(raiden.address), message=message)
         return False
 
     # Inform the transport that it's okay to send a Delivered message
