@@ -45,11 +45,11 @@ if [[ ! -x ${SYNAPSE} ]]; then
         "${SYNDIR}/app/homeserver.py"
     rm -f ${DESTDIR}/synapse.*
     cp dist/synapse "${SYNAPSE}"
-    ln -fs "${SYNAPSE}" "${SYNAPSE_LINK}"
 
     popd
     [[ -n ${RMBUILDDIR} ]] && rm -r "${BUILDDIR}"
 fi
+ln -fs "${SYNAPSE}" "${SYNAPSE_LINK}"
 
 cp "${BASEDIR}/raiden/tests/test_files/synapse-config.yaml" "${DESTDIR}/"
 "${SYNAPSE}" --server-name="${SYNAPSE_SERVER_NAME}" \

@@ -445,6 +445,13 @@ class NettingChannel:
         Return:
             Filter: The filter instance.
         """
+        log.info(
+            'netting channel filter',
+            contract_address=self.proxy.contract_address,
+            from_block=from_block,
+            to_block=to_block,
+        )
+
         return self.client.new_filter(
             contract_address=self.proxy.contract_address,
             topics=None,
