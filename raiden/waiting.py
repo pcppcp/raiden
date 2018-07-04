@@ -103,7 +103,13 @@ def wait_for_participant_newbalance(
             token_address,
             partner_address,
         )
-        log.debug('channel_state', channel_state=channel_state, balance=balance(channel_state))
+        log.debug(
+            'channel_state',
+            channel_state=channel_state,
+            balance=balance(channel_state),
+            partner_address=pex(partner_address),
+            node=pex(raiden.address),
+        )
 
 
 def wait_for_close(

@@ -53,6 +53,9 @@ from raiden.transfer.mediated_transfer.state_change import (
     ReceiveTransferRefundCancelRoute,
 )
 
+import structlog
+log = structlog.get_logger(__name__)  # pylint: disable=invalid-name
+
 
 def get_networks(node_state, payment_network_identifier, token_address):
     token_network_state = None

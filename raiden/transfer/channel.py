@@ -85,6 +85,10 @@ BalanceProofData = typing.Tuple[typing.Locksroot, typing.Nonce, typing.TokenAmou
 SendUnlockAndMerkleTree = typing.Tuple[SendBalanceProof, MerkleTreeState]
 
 
+import structlog
+log = structlog.get_logger(__name__)
+
+
 TransactionOrder = namedtuple(
     'TransactionOrder',
     ('block_number', 'transaction'),

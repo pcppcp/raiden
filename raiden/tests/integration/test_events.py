@@ -318,7 +318,6 @@ def test_query_events(raiden_chain, token_addresses, deposit, settle_timeout, re
     assert must_have_event(all_netting_channel_events, settled_event)
 
 
-@pytest.mark.xfail(reason='out-of-gas for unlock and settle')
 @pytest.mark.parametrize('number_of_nodes', [3])
 @pytest.mark.parametrize('channels_per_node', [CHAIN])
 def test_secret_revealed(raiden_chain, deposit, settle_timeout, token_addresses):

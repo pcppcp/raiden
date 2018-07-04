@@ -12,6 +12,8 @@ from raiden.transfer.state_change import (
     ReceiveTransferDirect,
 )
 
+import structlog
+log = structlog.get_logger(__name__)
 
 def subdispatch_to_channel_by_id(
         token_network_state,

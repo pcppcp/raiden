@@ -83,6 +83,8 @@ class ConnectionManager:
         self.lock = Semaphore()  #: protects self.funds and self.initial_channel_target
         self.api = RaidenAPI(raiden)
 
+        self.channel_sync_state_timeout = 5
+
     def connect(
             self,
             funds: int,
@@ -210,6 +212,12 @@ class ConnectionManager:
             if joining_funds <= 0 or self._leaving_state:
                 return
 
+            log.info(
+                'joining a channel',
+                funds=joining_funds,
+                me=pex(self.raiden.address),
+                partner=pex(partner_address),
+            )
             self.api.set_total_channel_deposit(
                 self.registry_address,
                 self.token_address,
@@ -292,7 +300,8 @@ class ConnectionManager:
         for partner in self.find_new_partners(qty_channels_to_open):
             try:
                 self.api.channel_open(
-                    self.token_network_identifier,
+                    self.registry_address,
+                    self.token_address,
                     partner,
                 )
             except DuplicatedChannelError:
@@ -300,9 +309,20 @@ class ConnectionManager:
                 # partner opens first.
                 log.info('partner opened channel first')
 
+            exception = BaseException('Internal state did not sync an existing channel')
+            with gevent.Timeout(self.channel_sync_state_timeout, exception=exception):
+                waiting.wait_for_newchannel(
+                    self.raiden,
+                    self.registry_address,
+                    self.token_address,
+                    partner,
+                    self.raiden.alarm.wait_time,
+                )
+
             try:
                 self.api.set_total_channel_deposit(
-                    self.token_network_identifier,
+                    self.registry_address,
+                    self.token_address,
                     partner,
                     self._initial_funding_per_partner,
                 )
