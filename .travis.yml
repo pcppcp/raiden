@@ -83,7 +83,7 @@ jobs:
     - stage: test
       <<: *job-template-integration
       env:
-        - TEST='raiden/tests/integration/test_echo_node.py'
+        - TEST='raiden/tests/integration/api/test_restapi.py::test_api_tokens raiden/tests/integration/test_pythonapi.py::test_token_swap raiden/tests/integration/test_blockchainservice.py::test_blockchain raiden/tests/integration/test_regression.py::test_regression_unfiltered_routes --count=5'
         - TRANSPORT_OPTIONS='--transport=matrix --local-matrix=${HOME}/.bin/run_synapse.sh'
         - RUN_SYNAPSE=1
 
