@@ -2,8 +2,8 @@
 import os
 import subprocess
 
-from setuptools import setup, find_packages
 from setuptools import Command
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import distutils.log
 from distutils.spawn import find_executable
