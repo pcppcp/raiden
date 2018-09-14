@@ -48,9 +48,12 @@ def _url_for(apiserver, endpoint, **kwargs):
 def start_apiserver(raiden_app, rest_api_port_number):
     raiden_api = RaidenAPI(raiden_app.raiden)
     rest_api = RestAPI(raiden_api)
-    api_server = APIServer(rest_api)
+    api_server = APIServer(rest_api, config={'host': 'localhost', 'port': rest_api_port_number})
+
+    # required for url_for
     api_server.flask_app.config['SERVER_NAME'] = 'localhost:{}'.format(rest_api_port_number)
-    api_server.start(port=rest_api_port_number)
+
+    api_server.start()
 
     wait_for_listening_port(rest_api_port_number)
 
@@ -68,7 +71,6 @@ def app_monitor(app, rest_api_port_number):
     api_server = start_apiserver(app, rest_api_port_number)
 
     while True:
-        app.start()
         api_server.start()
 
         # wait for a failure to happen and then stop the rest api
@@ -78,6 +80,8 @@ def app_monitor(app, rest_api_port_number):
         # wait for both services to stop
         app.raiden.get()
         api_server.get()
+
+        app.start()
 
 
 def new_app(app, raiden_event_handler=STATELESS_EVENT_HANDLER):

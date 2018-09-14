@@ -1059,16 +1059,17 @@ class NodeRunner:
 
         if self._options['rpc']:
             rest_api = RestAPI(self._raiden_api)
+            (api_host, api_port) = split_endpoint(self._options['api_address'])
             api_server = APIServer(
                 rest_api,
+                config={'host': api_host, 'port': api_port},
                 cors_domain_list=domain_list,
                 web_ui=self._options['web_ui'],
                 eth_rpc_endpoint=self._options['eth_rpc_endpoint'],
             )
-            (api_host, api_port) = split_endpoint(self._options['api_address'])
 
             try:
-                api_server.start(api_host, api_port)
+                api_server.start()
             except APIServerPortInUseError:
                 click.secho(
                     f'ERROR: API Address {api_host}:{api_port} is in use. '
@@ -1302,8 +1303,8 @@ def smoketest(ctx, debug, local_matrix, **kwargs):  # pylint: disable=unused-arg
 
         raiden_api = RaidenAPI(app.raiden)
         rest_api = RestAPI(raiden_api)
-        api_server = APIServer(rest_api)
         (api_host, api_port) = split_endpoint(args['api_address'])
+        api_server = APIServer(rest_api, config={'host': api_host, 'port': api_port})
         api_server.start(api_host, api_port)
 
         raiden_api.channel_open(

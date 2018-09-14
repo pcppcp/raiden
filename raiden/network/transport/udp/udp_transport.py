@@ -162,7 +162,7 @@ class UDPTransport(Runnable):
     def __init__(self, address, discovery, udpsocket, throttle_policy, config):
         super().__init__()
         # these values are initialized by the start method
-        self.queueids_to_queues: typing.Dict
+        self.queueids_to_queues: typing.Dict = dict()
         self.raiden: RaidenService
 
         self.discovery = discovery
@@ -206,7 +206,6 @@ class UDPTransport(Runnable):
 
         self.event_stop.clear()
         self.raiden = raiden
-        self.queueids_to_queues = dict()
 
         # server.stop() clears the handle. Since this may be a restart the
         # handle must always be set
@@ -214,6 +213,8 @@ class UDPTransport(Runnable):
 
         self.server.start()
         super().start()
+
+        log.debug('UDP TRANSPORT STARTED')
 
     def _run(self):
         """ Runnable main method, perform wait on long-running subtasks """
@@ -257,6 +258,8 @@ class UDPTransport(Runnable):
         # Set all the pending results to False
         for async_result in self.messageids_to_asyncresults.values():
             async_result.set(False)
+
+        self.queueids_to_queues = dict()
 
     def get_health_events(self, recipient):
         """ Starts a healthcheck task for `recipient` and returns a
