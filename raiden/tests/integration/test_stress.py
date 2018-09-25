@@ -244,6 +244,7 @@ def stress_send_serial_transfers(rest_apis, token_address, identifier_generator,
 
     # deplete the channels in the backwards direction
     for server_to, server_from in pairs:
+        log.critical('transfer', f=server_from, t=server_to)
         sequential_transfers(
             server_from=server_from,
             server_to=server_to,
